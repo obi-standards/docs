@@ -18,7 +18,7 @@ The catalog is organised around the three initial focus areas (investigations an
 | ID | Title | Focus area | Status |
 |---|---|---|---|
 | [OBIS-0001]({{< relref "OBIS-0001" >}}) | OBIS Document Lifecycle | Process | <span class="obis-status obis-status-draft">Draft</span> |
-| [OBIS-0002]({{< relref "OBIS-0002" >}}) | Shared Taxonomies for Blockchain Intelligence | Terminology | <span class="obis-status obis-status-draft">Draft</span> |
+| [OBIS-0002]({{< relref "OBIS-0002" >}}) | Shared Vocabulary for Blockchain Intelligence | Terminology | <span class="obis-status obis-status-draft">Draft</span> |
 | [OBIS-0003]({{< relref "OBIS-0003" >}}) | Attribution Tag Data Model and Exchange Format | Investigations and forensics | <span class="obis-status obis-status-draft">Draft</span> |
 
 Status badges: <span class="obis-status obis-status-draft">Draft</span> &middot; <span class="obis-status obis-status-pr">Public Review</span> &middot; <span class="obis-status obis-status-published">Published</span> &middot; <span class="obis-status obis-status-superseded">Superseded</span> &middot; <span class="obis-status obis-status-withdrawn">Withdrawn</span>

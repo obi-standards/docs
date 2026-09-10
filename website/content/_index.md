@@ -42,7 +42,7 @@ Three use-case domains anchor the first work cycle. Each corresponds to a concre
 
 Investigators work in isolated tool ecosystems with no systematic way to share findings and leads across platforms or agencies. Prosecutors find it difficult to demonstrate the reliability and validity of blockchain evidence because no standardised validation procedures exist, which complicates questions of admissibility. Courts therefore rely on case-by-case testimony from individual tool providers.
 
-OBIS work in this area: shared [terminologies and taxonomies]({{< relref "/standards/OBIS-0002" >}}), data models and exchange formats for [address attribution]({{< relref "/standards/OBIS-0003" >}}), reference specifications for address clustering, and formats that allow transaction graphs to be shared across organisations without exposing proprietary attribution data.
+OBIS work in this area: a shared [vocabulary]({{< relref "/standards/OBIS-0002" >}}), data models and exchange formats for [address attribution]({{< relref "/standards/OBIS-0003" >}}), reference specifications for address clustering, and formats that allow transaction graphs to be shared across organisations without exposing proprietary attribution data.
 
 {{< /obis-card >}}
 
@@ -76,7 +76,7 @@ OBIS specifications sit alongside the existing body of work in this space rather
 
 - **IVMS101** is the established data standard for originator and beneficiary identity information accompanying transfers between virtual asset service providers (VASPs). It is a transmittal standard, not an attribution standard. OBIS attribution work (e.g., [OBIS-0003]({{< relref "/standards/OBIS-0003" >}})) operates on a different segment of the workflow and does not subsume IVMS101.
 
-- **INTERPOL DW-VA-Taxonomy** is a widely referenced taxonomy for darkweb and virtual-asset activity. OBIS taxonomies in this area draw on it as prior art and aim to remain compatible where the underlying concepts overlap.
+- **INTERPOL DW-VA-Taxonomy** is a widely referenced taxonomy for darkweb and virtual-asset activity. Future OBIS classification work in this area will draw on it as prior art and aim to remain compatible where the underlying concepts overlap.
 
 - **National supervisory frameworks** vary by jurisdiction. OBIS specifications are designed to be referenceable by supervisors that choose to adopt them, without prescribing adoption.
 

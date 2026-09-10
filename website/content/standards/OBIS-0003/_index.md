@@ -36,7 +36,7 @@ OBIS-0003 covers:
 
 OBIS-0003 does not cover:
 
-- the controlled vocabularies for actor and abuse types (specified in [OBIS-0002]({{< relref "OBIS-0002" >}}));
+- the controlled vocabularies for actor and abuse types (not yet specified by OBIS; see §11);
 - the production of attributions (heuristics, clustering, investigative method);
 - transmittal protocols (push, pull, query); only the data format is normative.
 
@@ -44,18 +44,18 @@ OBIS-0003 does not cover:
 
 The key words **MUST**, **MUST NOT**, **SHOULD**, **SHOULD NOT**, and **MAY** are to be interpreted as described in [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119).
 
-- **Address.** An identifier that controls the receipt and spending of value on a blockchain, in the encoding defined by the respective chain's standards (e.g., the Bitcoin address formats specified in [BIP-173](https://github.com/bitcoin/bips/blob/master/bip-0173.mediawiki) and related BIPs, Ethereum account addresses with [EIP-55](https://eips.ethereum.org/EIPS/eip-55) checksumming).
+- **Address.** As defined in [OBIS-0002]({{< relref "OBIS-0002" >}}) §4.3: an identifier that controls the receipt and spending of value on a blockchain, in the encoding defined by the respective chain's standards (e.g., the Bitcoin address formats specified in [BIP-173](https://github.com/bitcoin/bips/blob/master/bip-0173.mediawiki) and related BIPs, Ethereum account addresses with [EIP-55](https://eips.ethereum.org/EIPS/eip-55) checksumming).
 - **Actor.** A real-world participant (e.g., service, organisation, natural person) to which an address may be attributed.
 - **Attribution Tag (or "tag").** A single record associating one address with real-world context: a free-text label, optionally refined by actor types and abuse types. The label may name an actor (e.g., `binance`) or simply describe the address's role (e.g., `ransomware payment address`).
 - **Attributor.** The organisation or individual asserting the tag.
-- **Actor type / Abuse type.** Concepts from the OBIS Actor Type and Abuse Type schemes ([OBIS-0002]({{< relref "OBIS-0002" >}}) §5 and §6). A tag may carry several concepts of either kind.
+- **Actor type / Abuse type.** Identifiers from a controlled vocabulary classifying, respectively, the kind of real-world participant an address represents and the kind of harmful activity observed. OBIS does not yet specify these vocabularies (§11); until it does, values are implementation-defined strings. A tag may carry several identifiers of either kind.
 
 ## 4. Design principles
 
 OBIS-0003 commits to the following principles:
 
 1. **Explicit chain identification.** Every tag names the chain its address lives on, alongside the address in the chain's native encoding. Nothing is inferred from address syntax; disambiguation across chains is a first-class concern.
-2. **Controlled vocabularies for categorisation.** Actor and abuse classifications are drawn from the OBIS-0002 concept schemes, not free-form text. A tag MAY carry several concepts, top-level or narrower, including `x-` extension concepts (OBIS-0002 §7).
+2. **Controlled vocabularies for categorisation.** Actor and abuse classifications are identifiers from a controlled vocabulary, not free-form text. Until OBIS specifies such vocabularies (§11), producers SHOULD draw values from a documented vocabulary they name (e.g., the INTERPOL DW-VA-Taxonomy, §10.2). A tag MAY carry several identifiers of either kind.
 3. **Human-readable evidence.** Every tag carries evidence that a human can assess: each evidence item has a description and optionally a URI pointing to a public source or a manifestation (e.g., a case file or screenshot). Machine-processable provenance chains are deferred (§11).
 4. **Address-scoped tags.** A tag provides context for exactly one address. Any extension of an attribution beyond the named address (e.g., via clustering) is the consumer's responsibility and is out of scope.
 
@@ -74,8 +74,8 @@ An attribution tag is a single record with the following fields:
 | `chain` | string | yes | Lowercase chain identifier (§5). |
 | `address` | string | yes | Address in the chain's native encoding (§5). |
 | `label` | string | yes | Human-readable, free-text label providing context for the address; may name an actor (e.g., `binance`) or describe a role (e.g., `ransomware payment address`). |
-| `actor_types` | array of strings | optional | Concepts from the OBIS Actor Type scheme (OBIS-0002 §5). |
-| `abuse_types` | array of strings | optional | Concepts from the OBIS Abuse Type scheme (OBIS-0002 §6). |
+| `actor_types` | array of strings | optional | Actor-type identifiers from a controlled vocabulary; vocabulary implementation-defined pending an OBIS classification document (§11). |
+| `abuse_types` | array of strings | optional | Abuse-type identifiers from a controlled vocabulary; vocabulary implementation-defined pending an OBIS classification document (§11). |
 | `attributor` | string | yes | URI or name identifying the organisation or individual asserting the tag. |
 | `evidence` | array | yes | Evidence items supporting the claim; at least one. |
 
@@ -109,8 +109,7 @@ Example:
     "chain": "bitcoin",
     "address": "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa",
     "label": "mixer-x",
-    "actor_types": ["service.x-mixer"],
-    "abuse_types": ["illicit-finance"],
+    "actor_types": ["tumbler"],
     "attributor": "https://attributor.example/",
     "evidence": [
       {
@@ -123,7 +122,7 @@ Example:
     "chain": "ethereum",
     "address": "0xAb16a96d359eC26A11e2c2B3D8F8b8942d5bfCdB",
     "label": "ransom payment address",
-    "abuse_types": ["extortion"],
+    "abuse_types": ["ransomware"],
     "attributor": "Attributor XY",
     "evidence": [
       {
@@ -142,7 +141,7 @@ Attribution tags are claims about real-world actors. Where the actor is a natura
 
 1. Implementations MUST treat attributions that identify a natural person as personal data and restrict their storage, exchange, and onward disclosure to recipients with a lawful basis.
 2. Evidence URIs MUST NOT point to resources disclosing personal data beyond what the attribution itself reveals (e.g., a link to a leaked document containing additional personal data is not appropriate evidence).
-3. Tags whose abuse types include `illicit-finance` in connection with CSAM or terrorism financing (OBIS-0002 §6) SHOULD be exchanged only with appropriately accredited recipients.
+3. Tags whose abuse types indicate CSAM or terrorism financing SHOULD be exchanged only with appropriately accredited recipients.
 
 ## 9. Conformance
 
@@ -150,7 +149,7 @@ An implementation is conformant with this document if, when exchanging attributi
 
 1. it produces records using the field names, types, and constraints defined in §6, including the mandatory `label`;
 2. it identifies addresses with explicit `chain` and `address` fields (§5);
-3. it draws actor and abuse concepts from the OBIS-0002 schemes, using the `x-` prefix for extensions;
+3. it populates `actor_types` and `abuse_types`, where present, with identifiers from a documented controlled vocabulary (§4);
 4. it carries at least one evidence item on every tag; and
 5. it applies the privacy provisions of §8.
 
@@ -164,7 +163,7 @@ GraphSense [TagPacks](https://github.com/graphsense/graphsense-tagpacks/wiki/Gra
 
 ### 10.2 INTERPOL DW-VA-Taxonomy
 
-The category and abuse fields in GraphSense TagPacks draw from the [INTERPOL DW-VA-Taxonomy](https://interpol-innovation-centre.github.io/DW-VA-Taxonomy/). OBIS-0003 references this work via OBIS-0002, which provides the concept schemes that OBIS attribution tags use.
+The category and abuse fields in GraphSense TagPacks draw from the [INTERPOL DW-VA-Taxonomy](https://interpol-innovation-centre.github.io/DW-VA-Taxonomy/). An OBIS classification scheme for actor and abuse types is deferred ([OBIS-0002]({{< relref "OBIS-0002" >}}) §9); the INTERPOL taxonomy is the expected base for that work and, in the interim, a documented vocabulary producers may name for `actor_types` and `abuse_types`.
 
 ### 10.3 W3C PROV Data Model
 
@@ -180,6 +179,7 @@ The major commercial blockchain analytics vendors (Chainalysis, TRM Labs, Ellipt
 
 ## 11. Open issues
 
+- **Actor and abuse vocabularies.** The controlled vocabularies for `actor_types` and `abuse_types` are deferred to a future OBIS classification document ([OBIS-0002]({{< relref "OBIS-0002" >}}) §9); until then both fields are unconstrained beyond §4 and the vocabulary in use SHOULD be documented by the producer.
 - **Tag bundles.** Bulk exchange with shared header metadata and defaults inheritance is deferred; until then, the exchange unit is an array of self-contained tags (§7).
 - **Custom fields.** An extension mechanism allowing tool providers to attach custom fields to a tag (e.g., under a reserved prefix or a dedicated extensions object) without breaking interoperability is deferred; until then, receivers SHOULD ignore unknown fields.
 - **Revocation and versioning.** Correcting or withdrawing exchanged tags (revocation records, supersession of earlier releases) is deferred to a future revision.
@@ -199,4 +199,4 @@ The major commercial blockchain analytics vendors (Chainalysis, TRM Labs, Ellipt
 - InterVASP, [*IVMS101 Data Standard*](https://www.intervasp.org/).
 - DefiLlama, [*Chains*](https://defillama.com/chains).
 - [OBIS-0001]({{< relref "OBIS-0001" >}}), *OBIS Document Lifecycle*.
-- [OBIS-0002]({{< relref "OBIS-0002" >}}), *Shared Taxonomies for Blockchain Intelligence*.
+- [OBIS-0002]({{< relref "OBIS-0002" >}}), *Shared Vocabulary for Blockchain Intelligence*.
