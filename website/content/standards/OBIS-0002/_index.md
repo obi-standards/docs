@@ -16,15 +16,15 @@ discussions-to: "https://github.com/orgs/obi-standards/discussions/2"
 
 ## Abstract
 
-Blockchain intelligence work is described in a small set of recurring terms: block, transaction, address, wallet, custodial, hot and cold storage, clustering, cluster. Each is used with different meanings by analytics vendors, investigators, regulators, and researchers, so that statements made in one context cannot be reliably interpreted in another. This document defines a shared vocabulary of such terms. Each term carries a stable identifier and a normative definition, together with informative notes on chain-specific variation and common misuse, so that OBIS specifications and independent implementations can refer to the same concept by the same name. The vocabulary is organised in four groups: technical primitives, custody and control, wallet operational roles, and computational methods.
+Blockchain intelligence relies on a small set of recurring terms (e.g., address, wallet, cluster) that analytics vendors, investigators, regulators, and researchers use with different meanings, so that a statement made in one context cannot be reliably interpreted in another. This document defines a shared vocabulary for such terms. Each entry consists of a stable identifier, a normative definition, and informative notes on chain-specific variation and divergent usage, so that OBIS specifications and independent implementations can refer to the same concept by the same name. The vocabulary is chain-agnostic and organised in four groups: technical primitives, custody and control, wallet operational roles, and computational methods.
 
 ## 1. Introduction
 
-Many disagreements in the exchange of blockchain intelligence are not disagreements about facts on the chain but about words. "Wallet" denotes a piece of key-management software in one report, a set of addresses inferred by a heuristic in another, and a real-world account holder in a third. "Cold wallet" is variously a device, a role, or a balance tier. "Cluster" is sometimes a hypothesis about common control and sometimes an entity with a name attached. Statements that reuse these words without fixing their meaning inherit the ambiguity, and classification schemes built on top of them cannot be more precise than the terms they rest on.
+Many disagreements in the exchange of blockchain intelligence are not disagreements about facts on the chain but about words. "Wallet" denotes a piece of key-management software in one report and a set of addresses inferred by a heuristic in another. "Cold wallet" is variously a device, a role, or a balance tier. "Cluster" is sometimes a hypothesis about common control and sometimes an entity with a name attached. Statements that reuse these words without fixing their meaning inherit the ambiguity, and any classification of actors or abuses built on top of them cannot be more precise than the terms it rests on.
 
-OBIS-0002 therefore starts at the level of definitions. It fixes the meaning of a small number of terms that recur across OBIS specifications and across the wider practice of blockchain intelligence. Where existing definitions are precise enough, the vocabulary adopts them and says where they come from. Where usage is inconsistent, the vocabulary makes a choice and records the alternatives it departs from.
+OBIS-0002 therefore confines itself to definitions. It fixes the meaning of a small number of terms that recur across OBIS specifications and across the wider practice of blockchain intelligence. Where an existing definition is precise enough for the exchange of intelligence data, the vocabulary adopts it and states its source. Where usage is inconsistent, the vocabulary makes a choice and records the alternatives it departs from. Where no shared definition exists, it proposes one and marks it as such.
 
-The vocabulary is chain-agnostic. Where a term means something different under the unspent-transaction-output (UTXO) model and the account model, the entry says so rather than privileging one.
+The vocabulary is chain-agnostic. Where a term means something different under the unspent-transaction-output (UTXO) model and the account model, the entry says so rather than adopting the meaning of one model.
 
 ## 2. Scope
 
@@ -37,22 +37,22 @@ This document defines terms in four groups:
 
 Out of scope:
 
-- classification of actors and abuse types; earlier revisions of this document specified such schemes, and the work is deferred to a separate document (§9);
 - legal definitions, such as virtual asset service provider (VASP) or crypto-asset service provider (CASP), which are referenced where relevant and not redefined;
 - protocol detail beyond what is needed to interpret intelligence data.
 
 ## 3. Conventions
 
-The key words **MUST**, **MUST NOT**, **SHOULD**, **SHOULD NOT**, and **MAY** are to be interpreted as described in [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119).
+The key words **MUST**, **MUST NOT**, **SHOULD**, **SHOULD NOT**, and **MAY** in this document are to be interpreted as described in [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119) and [RFC 8174](https://www.rfc-editor.org/rfc/rfc8174) when, and only when, they appear in all capitals.
 
 Each term is presented as an entry with the following parts:
 
-- **Identifier.** A stable, lower-case, hyphen-separated token (e.g., `hot-wallet`) by which OBIS documents and implementations refer to the term. Identifiers are reserved by OBIS and do not change once assigned; the preferred label and the definition may be revised.
-- **Definition.** The normative meaning of the term, in English.
+- **Label.** The English name of the term, used as the entry heading.
+- **Identifier.** A stable, lower-case, hyphen-separated token (e.g., `hot-wallet`) by which OBIS documents and implementations refer to the term. Identifiers are reserved by OBIS and do not change once assigned; the label and the definition may be revised.
+- **Definition.** The normative meaning of the term.
 - **Notes.** Informative remarks on chain-specific variation, boundary cases, and usages this vocabulary departs from.
 - **Sources.** Informative pointers to prior definitions the entry aligns with or diverges from.
 
-Documents and implementations that reference this vocabulary SHOULD use the identifier, and MAY additionally display the label in any language. A term used in an OBIS document with the meaning defined here is linked to its entry on first use.
+Documents and implementations that reference this vocabulary SHOULD use the identifier, and MAY additionally display the label, in English or in another language. A term used in an OBIS document with the meaning defined here is linked to its entry on first use.
 
 ## 4. Technical primitives
 
@@ -72,14 +72,15 @@ Documents and implementations that reference this vocabulary SHOULD use the iden
 
 ### 4.2 Transaction
 
-**Identifier:** `transaction`
+**Identifier.** `transaction`
 
-**Definition.** A signed message, recorded in a block, that transfers value or invokes code on a blockchain, and that is identified by its transaction hash.
+**Definition.** A message, recorded in a block and identified by its transaction hash, that transfers value, creates a contract, or invokes code on a blockchain.
 
 **Notes.**
 
+- Transactions are authorised by the signatures of the parties that control the value or accounts they spend from. The exception is the coinbase transaction of a UTXO-model block, which issues new value and consumes no prior outputs, and is authored by the block producer without a signature.
 - Under the UTXO model a transaction consumes one or more previously created outputs as *inputs* and creates new *outputs*; there is no single sender or recipient, and value flow is read from the set of inputs and outputs.
-- Under the account model a transaction has exactly one sender account and one recipient account or contract, a value, and optional call data.
+- Under the account model a transaction has exactly one sender account, a value, optional call data, and either one recipient account or contract or, for contract creation, no recipient.
 - Value movements that occur as a *consequence* of a transaction, such as transfers triggered by contract code (EVM "internal transactions" or traces) or token transfers recorded in event logs, are effects of a transaction and are not transactions in the sense of this entry. Intelligence data SHOULD state whether it accounts for such effects.
 - A transaction that has been broadcast but not yet included in a block is *unconfirmed*; the term as defined here refers to recorded transactions unless stated otherwise.
 
@@ -87,134 +88,121 @@ Documents and implementations that reference this vocabulary SHOULD use the iden
 
 ### 4.3 Address
 
-**Identifier:** `address`
+**Identifier.** `address`
 
-**Definition.** A chain-specific identifier, derived from a public key, a script, or a contract creation, that designates where value can be received on a blockchain and the condition under which it can be spent.
+**Definition.** A chain-specific identifier, derived from a public key, a script, or a contract creation, that designates an account or an output script to which value can be sent on a blockchain.
 
 **Notes.**
 
-- On Bitcoin an address is the encoding of a spending condition: a hash of a public key or of a script, in the Base58Check formats of [BIP-13](https://github.com/bitcoin/bips/blob/master/bip-0013.mediawiki) or the Bech32 and Bech32m formats of [BIP-173](https://github.com/bitcoin/bips/blob/master/bip-0173.mediawiki) and [BIP-350](https://github.com/bitcoin/bips/blob/master/bip-0350.mediawiki). Addresses do not appear in the chain as such; transactions carry the underlying scripts.
-- On Ethereum an address is the rightmost 160 bits of the Keccak-256 hash of an account's public key, or, for a contract, of the creator's address and nonce (Yellow Paper §7); the mixed-case checksum encoding is specified in [EIP-55](https://eips.ethereum.org/EIPS/eip-55).
-- An address is not an actor. The same party typically controls many addresses, and hierarchical-deterministic wallets generate new addresses on demand; conversely a contract address is controlled by code rather than by a key.
-- Addresses are scoped to a chain. The same string may be valid on several chains, as with the shared address format of EVM-compatible chains, and denote unrelated control; intelligence data therefore identifies the chain together with the address.
+- On Bitcoin an address is the encoding of a spending condition: the hash of a public key or of a script, or, for Taproot outputs, a tweaked public key, in the Base58Check formats of [BIP-13](https://github.com/bitcoin/bips/blob/master/bip-0013.mediawiki) or the Bech32 and Bech32m formats of [BIP-173](https://github.com/bitcoin/bips/blob/master/bip-0173.mediawiki), [BIP-350](https://github.com/bitcoin/bips/blob/master/bip-0350.mediawiki), and [BIP-341](https://github.com/bitcoin/bips/blob/master/bip-0341.mediawiki). Addresses do not appear in the chain as such; transactions carry the underlying scripts.
+- On Ethereum an address is the rightmost 160 bits of the Keccak-256 hash of an account's public key or, for a contract, of the creator's address and nonce (Yellow Paper §7) or of a salt and the contract's initialisation code ([EIP-1014](https://eips.ethereum.org/EIPS/eip-1014)), which makes some contract addresses predictable before deployment; the mixed-case checksum encoding is specified in [EIP-55](https://eips.ethereum.org/EIPS/eip-55).
+- An address is not an actor. The same party typically controls many addresses, and hierarchical-deterministic wallets generate new addresses on demand. A contract address is controlled by code rather than by a key.
+- Addresses are scoped to a chain. The same address string is valid on all chains that use the Ethereum address format. For an externally owned account it is controlled by the same key on each of them, but balance and history differ per chain, and a contract deployed at an address on one chain may be absent or different on another. Intelligence data therefore identifies the chain together with the address.
 
-**Sources.** Bitcoin Project, *Developer Glossary*, "Address"; Ethereum Foundation, *Ethereum Glossary*, "Address"; Wood, *Ethereum Yellow Paper*, §7; BIP-13, BIP-173, BIP-350; EIP-55.
+**Sources.** Bitcoin Project, *Developer Glossary*, "Address"; Ethereum Foundation, *Ethereum Glossary*, "Address"; Wood, *Ethereum Yellow Paper*, §7; BIP-13, BIP-173, BIP-341, BIP-350; EIP-55, EIP-1014.
 
 ## 5. Custody and control
 
 ### 5.1 Wallet
 
-**Identifier:** `wallet`
+**Identifier.** `wallet`
 
-**Definition.** Software, hardware, or a service that manages the private keys controlling one or more addresses, and through those keys the ability to transfer value from those addresses.
+**Definition.** Software, hardware, or a service that holds the private keys controlling one or more addresses and signs transactions from those addresses.
 
 **Notes.**
 
-- A wallet is an off-chain instrument of control. It has no on-chain representation; what is observable on chain are the addresses it controls and the transactions it signs.
-- One wallet controls many addresses. The relation between a wallet and the addresses it controls is generally not observable and must be inferred (§7).
+- A key-based wallet is an off-chain instrument of control with no on-chain representation; what is observable on chain are the addresses it controls and the transactions it signs.
+- A wallet typically controls many addresses under the UTXO model, where new addresses are generated per receipt, and one or few under the account model. The relation between a wallet and the addresses it controls is generally not observable and must be inferred (§7).
 - In vendor and investigative usage "wallet" is frequently used for a set of addresses inferred to be under common control. This vocabulary reserves `cluster` (§7.3) for that meaning: a cluster is an inference about a wallet, not the wallet itself.
-- Smart-contract wallets (multi-signature contracts, account-abstraction accounts) hold value in a contract whose transfer rules are code. They are wallets in the sense of this entry, with the parties authorised by the contract as key holders.
+- Smart-contract wallets (multi-signature contracts, account-abstraction accounts) are the exception to the first note: they hold value in an on-chain contract whose transfer rules are code, and the signers the contract authorises take the role of the key holder. They are wallets in the sense of this entry.
 
 **Sources.** Chainalysis, *Crypto Glossary*, "Crypto Wallet" (aligned: a tool that stores the keys used to access and manage crypto-assets).
 
 ### 5.2 Custodial wallet
 
-**Identifier:** `custodial-wallet`
+**Identifier.** `custodial-wallet`
 
-**Definition.** A wallet whose private keys are held by a party other than the holder of the value it controls, so that a transfer requires the action of that party.
+**Definition.** A wallet whose private keys are held by a party other than the beneficiary of the value it controls, so that a transfer requires the action of that party.
 
 **Notes.**
 
-- The key-holding party is the *custodian*; the holder has a claim against the custodian rather than on-chain control. Custodians are typically services subject to VASP or CASP obligations.
-- On chain, custodial wallets appear as addresses operated by the custodian. Value belonging to many holders is commonly pooled in the custodian's addresses, so that an address of a custodial wallet does not correspond to one holder.
+- The key-holding party is the *custodian*; the beneficiary has a claim against the custodian rather than on-chain control. Custodians are typically services subject to VASP or CASP obligations.
+- On chain, custodial wallets appear as addresses operated by the custodian. Custodians commonly assign each beneficiary a *deposit address* and sweep received value into pooled addresses that hold the value of many beneficiaries. A deposit address may therefore be associated with one beneficiary, a pooled address with none in particular.
 - The test is control over the keys, not the legal form of the relationship. This follows the FATF approach, under which a service that holds or controls private keys on behalf of others provides custody.
 
 **Sources.** FATF (2021), *Updated Guidance for a Risk-Based Approach to Virtual Assets and Virtual Asset Service Providers*; Regulation (EU) 2023/1114 (MiCA), Art. 3(1)(17) ("providing custody and administration of crypto-assets on behalf of clients"); Chainalysis, *Crypto Glossary*, "Crypto Wallet".
 
 ### 5.3 Non-custodial wallet
 
-**Identifier:** `non-custodial-wallet`
+**Identifier.** `non-custodial-wallet`
 
-**Definition.** A wallet whose private keys are held by the holder of the value it controls, so that no other party can transfer that value.
+**Definition.** A wallet whose private keys are held by the beneficiary of the value it controls, so that no other party can transfer that value.
 
 **Notes.**
 
-- Also called *self-custody*, *self-hosted*, or, in regulatory texts, *unhosted* wallet. Hardware wallets, mobile and browser wallets, and paper keys are non-custodial when the holder alone keeps the keys.
+- Also called a *self-custodial* wallet, a *self-hosted* wallet or address (Regulation (EU) 2023/1113), or, in FATF usage, an *unhosted* wallet. Hardware wallets, mobile and browser wallets, and paper keys are non-custodial when the beneficiary alone keeps the keys.
 - Multi-signature arrangements in which all key holders are the same party are non-custodial.
-- Arrangements that split keys between the holder and a service (e.g., a 2-of-3 scheme with a recovery key held by a provider) are classified by who can complete a transfer without the other's participation. Where neither party can, the arrangement is a shared-custody boundary case; its treatment is deferred (§9).
+- Arrangements that split keys between the beneficiary and a service (e.g., a 2-of-3 scheme with a recovery key held by a provider) are classified by who can complete a transfer alone. Where neither party can, the arrangement is a shared-custody boundary case; its treatment is deferred (§9).
 
-**Sources.** FATF (2021), which uses "unhosted wallet" for this case; Chainalysis, *Crypto Glossary*, "Crypto Wallet".
+**Sources.** FATF (2021), which uses "unhosted wallet" for this case; Regulation (EU) 2023/1113, Art. 3(20) ("self-hosted address"); Chainalysis, *Crypto Glossary*, "Crypto Wallet".
 
 ## 6. Wallet operational roles
 
-Operators of services distinguish their wallets by how signing keys are exposed: continuously online and signing automatically, online but signing under approval, or offline. These are *roles* assigned by the operator's practice, not properties of a technology, and they are typically inferred from transaction patterns rather than observed on chain. Intelligence work uses them to interpret flows, for instance sweeps from deposit addresses into a hot wallet, or periodic transfers between hot and cold storage.
+Operators of services distinguish their wallets by where signing keys are held and how they are used: online and signing automatically, online but signing under approval, or offline. These are *roles* assigned by the operator's practice, not properties of a technology, and they are typically inferred from transaction patterns rather than observed on chain. Intelligence work uses them to interpret flows, for instance sweeps from deposit addresses into a hot wallet, or periodic transfers between hot and cold wallets.
 
 ### 6.1 Hot wallet
 
-**Identifier:** `hot-wallet`
+**Identifier.** `hot-wallet`
 
 **Definition.** A wallet whose signing keys are held on a system connected to a network and that signs transactions automatically, without per-transaction human approval.
 
 **Notes.**
 
 - Hot wallets serve continuous operations such as processing customer withdrawals and consolidating deposits. They carry the highest exposure to key compromise and typically hold a small share of an operator's total balance.
-- Connectivity alone does not make a wallet hot; the defining property is automatic signing. A wallet that is online but signs only under approval is a warm wallet (§6.2).
+- Connectivity alone does not make a wallet hot; the defining property is automatic signing. Automated checks applied before signing, such as transaction limits or address allow-lists, do not change the role. A wallet that is online but signs only after human approval of each transaction is a warm wallet (§6.2).
 
 **Sources.** Chainalysis, *Crypto Glossary*, "Crypto Wallet" (aligned on connectivity; this entry adds the signing-policy criterion).
 
 ### 6.2 Warm wallet
 
-**Identifier:** `warm-wallet`
+**Identifier.** `warm-wallet`
 
-**Definition.** A wallet whose signing keys are held on a system that can connect to a network, but that signs only after manual or policy-based approval of each transaction.
+**Definition.** A wallet whose signing keys are held on a system that can connect to a network, but that signs only after human approval of each transaction.
 
 **Notes.**
 
-- Warm wallets form an intermediate liquidity tier: they replenish hot wallets and receive value from cold storage, under controls such as multi-party approval, transaction limits, and address allow-lists.
-- No widely shared definition exists; vendor glossaries commonly define hot and cold wallets only. This vocabulary distinguishes warm from hot by signing policy and warm from cold by whether the signing system can connect to a network.
+- Warm wallets form an intermediate liquidity tier: they replenish hot wallets and receive value from cold wallets. Approval is typically multi-party and combined with automated controls such as transaction limits and address allow-lists.
+- No widely shared definition exists; vendor glossaries commonly define hot and cold wallets only. The definition here is a proposal of this vocabulary. It distinguishes warm from hot by whether a person approves each transaction, and warm from cold by whether the signing system can connect to a network.
 
 **Sources.** CryptoCurrency Certification Consortium (C4), *CryptoCurrency Security Standard*, which specifies the key-management controls operators apply to such wallets without naming the roles.
 
 ### 6.3 Cold wallet
 
-**Identifier:** `cold-wallet`
+**Identifier.** `cold-wallet`
 
-**Definition.** A wallet whose signing keys are generated and held on systems that are never connected to a network, so that transactions are signed offline and transferred to a connected system for broadcast.
+**Definition.** A wallet whose signing keys are generated and held on systems that are never connected to a network, that is used only for infrequent transfers, and whose transactions are signed offline and transferred to a connected system for broadcast.
 
 **Notes.**
 
-- Cold storage holds the bulk of an operator's balance; movements from it are infrequent and typically large.
-- The role is defined by practice, not by device. A hardware wallet used for daily signing on a connected host is not a cold wallet in the sense of this entry.
+- Cold wallets hold the bulk of an operator's balance; movements from them are infrequent and typically large.
+- The role is defined by practice, not by device. A hardware wallet keeps its keys offline, but one that signs daily operational transactions under human approval plays the warm role (§6.2), not the cold role.
 
 **Sources.** Chainalysis, *Crypto Glossary*, "Crypto Wallet" (aligned: keys kept offline).
 
 ## 7. Computational methods
 
-### 7.1 Address clustering
-
-**Identifier:** `address-clustering`
-
-**Definition.** The process of grouping addresses that are presumed to be controlled by the same party, based on evidence observable on the blockchain and on one or more stated clustering heuristics.
-
-**Notes.**
-
-- Clustering is inference, not observation. Its result is only interpretable together with the heuristics that produced it; intelligence data derived from clustering SHOULD state those heuristics.
-- Under the UTXO model the canonical heuristic is the *multi-input* (or *co-spend*) heuristic: all inputs of a transaction are presumed to be controlled by the same party. It fails for collaborative transactions such as CoinJoin, which are constructed to violate it. The *change-address* heuristic identifies which output of a transaction returns value to the sender and links it to the inputs.
-- Under the account model there is no co-spending; clustering rests on other signals, such as the sweeping of deposit addresses into a service's hot wallet, or funding relations between addresses.
-
-**Sources.** Meiklejohn et al. (2013); Androulaki et al. (2013); Harrigan and Fretter (2016); Chainalysis, *Crypto Glossary*, "Address Clustering" (aligned on the definition).
+The primitives of §4 are observed; the wallets and roles of §5 and §6 are not, and intelligence work reaches them by inference from on-chain data. The terms in this section name that inference and its result: the process of grouping addresses, the rules the process applies, and the sets of addresses it produces. Keeping these apart from the wallets and actors they are inferences about is the main purpose of the section, since a large share of the disagreement noted in §1 comes from using the result of an inference as if it were an observation.
 
 ### 7.2 Clustering heuristic
 
-**Identifier:** `clustering-heuristic`
+**Identifier.** `clustering-heuristic`
 
-**Definition.** A rule that infers common control of two or more addresses from a pattern in on-chain data, together with the conditions under which the inference is known to fail.
+**Definition.** A rule that infers common control of two or more addresses from a pattern in on-chain data.
 
 **Notes.**
 
-- A heuristic without a statement of its failure conditions is not sufficiently specified for exchange. Reference specifications of individual heuristics are planned as separate OBIS work (§9).
-
-**Sources.** Meiklejohn et al. (2013) §4; Harrigan and Fretter (2016).
+- Every heuristic has conditions under which the inferred control does not hold. A heuristic is sufficiently specified for exchange only if these failure conditions are stated together with the rule; a statement of heuristics as required by §7.1 SHOULD include them.
+- A name alone does not identify a heuristic, since implementations of a heuristic under the same name differ in detail, for instance in whether
 
 ### 7.3 Cluster
 
@@ -242,7 +230,7 @@ The [Bitcoin developer glossary](https://developer.bitcoin.org/glossary.html) an
 
 ### 8.3 Regulatory definitions
 
-The FATF *Updated Guidance for a Risk-Based Approach to Virtual Assets and Virtual Asset Service Providers* (2021) and Regulation (EU) 2023/1114 (MiCA) define custody in terms of holding or controlling private keys on behalf of others, and use "unhosted" or "self-hosted" wallet for the non-custodial case. §5 follows these definitions and references them rather than restating them; the legal categories VASP and CASP themselves are out of scope.
+The FATF *Updated Guidance for a Risk-Based Approach to Virtual Assets and Virtual Asset Service Providers* (2021) and Regulation (EU) 2023/1114 (MiCA) define custody in terms of holding or controlling private keys on behalf of others. For the non-custodial case FATF uses "unhosted wallet" and Regulation (EU) 2023/1113 "self-hosted address". §5 follows these definitions and references them rather than restating them; the legal categories VASP and CASP themselves are out of scope.
 
 ### 8.4 INTERPOL DW-VA-Taxonomy and GraphSense conventions
 
