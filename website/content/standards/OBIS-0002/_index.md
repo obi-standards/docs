@@ -16,11 +16,11 @@ discussions-to: "https://github.com/orgs/obi-standards/discussions/2"
 
 ## Abstract
 
-Blockchain intelligence work is described in a small set of recurring terms: block, transaction, address, wallet, custodial, hot and cold storage, clustering, cluster. Each is used with different meanings by analytics vendors, investigators, regulators, and researchers, so that statements made in one context cannot be reliably interpreted in another. This document defines a shared vocabulary of such terms. Each term carries a stable identifier and a normative definition, together with informative notes on chain-specific variation and common misuse, so that OBIS specifications and independent implementations can refer to the same concept by the same name. The vocabulary is organised in four groups: technical primitives, custody and control, wallet operational roles, and computational methods. Classification schemes for actors and abuse types are out of scope and deferred to a separate document.
+Blockchain intelligence work is described in a small set of recurring terms: block, transaction, address, wallet, custodial, hot and cold storage, clustering, cluster. Each is used with different meanings by analytics vendors, investigators, regulators, and researchers, so that statements made in one context cannot be reliably interpreted in another. This document defines a shared vocabulary of such terms. Each term carries a stable identifier and a normative definition, together with informative notes on chain-specific variation and common misuse, so that OBIS specifications and independent implementations can refer to the same concept by the same name. The vocabulary is organised in four groups: technical primitives, custody and control, wallet operational roles, and computational methods.
 
 ## 1. Introduction
 
-Most disagreements in the exchange of blockchain intelligence are not disagreements about facts on the chain but about words. "Wallet" denotes a piece of key-management software in one report, a set of addresses inferred by a heuristic in another, and a real-world account holder in a third. "Cold wallet" is variously a device, a role, or a balance tier. "Cluster" is sometimes a hypothesis about common control and sometimes an entity with a name attached. Statements that reuse these words without fixing their meaning inherit the ambiguity, and classification schemes built on top of them cannot be more precise than the terms they rest on.
+Many disagreements in the exchange of blockchain intelligence are not disagreements about facts on the chain but about words. "Wallet" denotes a piece of key-management software in one report, a set of addresses inferred by a heuristic in another, and a real-world account holder in a third. "Cold wallet" is variously a device, a role, or a balance tier. "Cluster" is sometimes a hypothesis about common control and sometimes an entity with a name attached. Statements that reuse these words without fixing their meaning inherit the ambiguity, and classification schemes built on top of them cannot be more precise than the terms they rest on.
 
 OBIS-0002 therefore starts at the level of definitions. It fixes the meaning of a small number of terms that recur across OBIS specifications and across the wider practice of blockchain intelligence. Where existing definitions are precise enough, the vocabulary adopts them and says where they come from. Where usage is inconsistent, the vocabulary makes a choice and records the alternatives it departs from.
 
@@ -89,15 +89,16 @@ Documents and implementations that reference this vocabulary SHOULD use the iden
 
 **Identifier:** `address`
 
-**Definition.** An identifier that controls the receipt and spending of value on a blockchain, in the encoding defined by the respective chain's standards.
+**Definition.** A chain-specific identifier, derived from a public key, a script, or a contract creation, that designates where value can be received on a blockchain and the condition under which it can be spent.
 
 **Notes.**
 
-- Bitcoin address formats are specified in [BIP-173](https://github.com/bitcoin/bips/blob/master/bip-0173.mediawiki) and related BIPs; Ethereum account addresses use [EIP-55](https://eips.ethereum.org/EIPS/eip-55) checksumming. A Bitcoin address encodes a spending condition (script); an Ethereum address is derived from a public key or from the creating transaction of a contract.
+- On Bitcoin an address is the encoding of a spending condition: a hash of a public key or of a script, in the Base58Check formats of [BIP-13](https://github.com/bitcoin/bips/blob/master/bip-0013.mediawiki) or the Bech32 and Bech32m formats of [BIP-173](https://github.com/bitcoin/bips/blob/master/bip-0173.mediawiki) and [BIP-350](https://github.com/bitcoin/bips/blob/master/bip-0350.mediawiki). Addresses do not appear in the chain as such; transactions carry the underlying scripts.
+- On Ethereum an address is the rightmost 160 bits of the Keccak-256 hash of an account's public key, or, for a contract, of the creator's address and nonce (Yellow Paper §7); the mixed-case checksum encoding is specified in [EIP-55](https://eips.ethereum.org/EIPS/eip-55).
 - An address is not an actor. The same party typically controls many addresses, and hierarchical-deterministic wallets generate new addresses on demand; conversely a contract address is controlled by code rather than by a key.
-- Addresses are scoped to a chain; the same string may be valid on several chains and denote unrelated control. [OBIS-0003]({{< relref "OBIS-0003" >}}) §5 therefore requires an explicit chain identifier alongside every address.
+- Addresses are scoped to a chain. The same string may be valid on several chains, as with the shared address format of EVM-compatible chains, and denote unrelated control; intelligence data therefore identifies the chain together with the address.
 
-**Sources.** Definition identical to OBIS-0003 §3, which references this entry from its next revision.
+**Sources.** Bitcoin Project, *Developer Glossary*, "Address"; Ethereum Foundation, *Ethereum Glossary*, "Address"; Wood, *Ethereum Yellow Paper*, §7; BIP-13, BIP-173, BIP-350; EIP-55.
 
 ## 5. Custody and control
 
@@ -224,7 +225,7 @@ Operators of services distinguish their wallets by how signing keys are exposed:
 **Notes.**
 
 - A cluster is not a wallet. One wallet may span several clusters where the heuristics miss a link, and one cluster may merge several wallets where a heuristic fails.
-- A cluster is not an actor. A cluster becomes attributed only when evidence links it, or an address in it, to a real-world actor; [OBIS-0003]({{< relref "OBIS-0003" >}}) specifies the record carrying such evidence for a single address and leaves the extension of an attribution from an address to its cluster to the consumer (OBIS-0003 §4).
+- A cluster is not an actor. A cluster becomes attributed only when evidence links it, or an address in it, to a real-world actor. Whether an attribution established for one address extends to the cluster containing it is a judgement of the consumer, which depends on the heuristics behind the cluster.
 - Vendor usage often calls an attributed cluster an *entity*. This vocabulary does not yet define *entity*; see §9.
 
 **Sources.** Chainalysis, *Crypto Glossary*, "Address Clustering", which defines a cluster as attributed to a named actor; this entry departs by separating the inference (cluster) from the attribution.
@@ -249,7 +250,7 @@ The [INTERPOL Darkweb and Virtual Assets Taxonomy](https://interpol-innovation-c
 
 ## 9. Open issues
 
-- **Actor and abuse classification.** Earlier revisions of this document specified Actor Type and Abuse Type concept schemes with an extension mechanism. That material is withdrawn from this document and will be reintroduced as a separate OBIS classification document built on this vocabulary. Until then the `actor_types` and `abuse_types` fields of [OBIS-0003]({{< relref "OBIS-0003" >}}) are not constrained by OBIS.
+- **Actor and abuse classification.** Earlier revisions of this document specified Actor Type and Abuse Type concept schemes with an extension mechanism. That material is withdrawn from this document and will be reintroduced as a separate OBIS classification document built on this vocabulary. Until then OBIS specifies no actor or abuse categories.
 - **Further terms.** Candidates for later revisions include *actor*, *entity*, *service*, *attribution*, *label*, *transaction graph*, *mixer* and *CoinJoin*, and *bridge*. Proposals go to the discussion thread linked in the status block.
 - **Shared custody.** Arrangements in which neither the holder nor a service can complete a transfer alone (§5.3) are not yet classified.
 - **Heuristic specifications.** Reference specifications of individual clustering heuristics, including their failure conditions, are planned as separate OBIS work.
@@ -261,7 +262,9 @@ The [INTERPOL Darkweb and Virtual Assets Taxonomy](https://interpol-innovation-c
 - IETF [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119), *Key words for use in RFCs to Indicate Requirement Levels*.
 - S. Nakamoto, [*Bitcoin: A Peer-to-Peer Electronic Cash System*](https://bitcoin.org/bitcoin.pdf), 2008.
 - G. Wood, [*Ethereum: A Secure Decentralised Generalised Transaction Ledger*](https://ethereum.github.io/yellowpaper/paper.pdf) (Yellow Paper).
+- Bitcoin, [BIP-13](https://github.com/bitcoin/bips/blob/master/bip-0013.mediawiki), *Address Format for pay-to-script-hash*.
 - Bitcoin, [BIP-173](https://github.com/bitcoin/bips/blob/master/bip-0173.mediawiki), *Base32 address format for native v0-16 witness outputs*.
+- Bitcoin, [BIP-350](https://github.com/bitcoin/bips/blob/master/bip-0350.mediawiki), *Bech32m format for v1+ witness addresses*.
 - Ethereum, [EIP-55](https://eips.ethereum.org/EIPS/eip-55), *Mixed-case checksum address encoding*.
 - Bitcoin Project, [*Developer Glossary*](https://developer.bitcoin.org/glossary.html).
 - Ethereum Foundation, [*Ethereum Glossary*](https://ethereum.org/en/glossary/).
@@ -275,4 +278,3 @@ The [INTERPOL Darkweb and Virtual Assets Taxonomy](https://interpol-innovation-c
 - INTERPOL Innovation Centre, [*Darkweb and Virtual Assets Taxonomy*](https://interpol-innovation-centre.github.io/DW-VA-Taxonomy/). Entity Taxonomy v0.3, Abuse Taxonomy v0.1.
 - GraphSense, [*TagPacks Wiki*](https://github.com/graphsense/graphsense-tagpacks/wiki/GraphSense-TagPacks).
 - [OBIS-0001]({{< relref "OBIS-0001" >}}), *OBIS Document Lifecycle*.
-- [OBIS-0003]({{< relref "OBIS-0003" >}}), *Attribution Tag Data Model and Exchange Format*.
