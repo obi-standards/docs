@@ -16,7 +16,7 @@ discussions-to: "https://github.com/orgs/obi-standards/discussions/3"
 
 ## Abstract
 
-Attribution, the association of a pseudonymous blockchain address with real-world context, is the core analytical activity in investigations, supervision, and research on blockchain data, but each platform represents the same underlying claim in its own format, so attributions produced in one ecosystem cannot be verified or reused in another. This document aims to make attribution claims portable across organisations and tools. It specifies a data model and exchange format for attribution tags: self-contained records that associate one blockchain address with a human-readable label, optionally refined by actor and abuse types, each carrying an attributor and human-readable evidence. The format is deliberately minimal; bundling, revocation, and machine-processable provenance are deferred to future revisions.
+Attribution, the evidence-based association of an address with a real-world actor ([OBIS-0002]({{< relref "OBIS-0002#82-attribution" >}}) §8.2), is the core analytical activity in investigations, supervision, and research on blockchain data, but each platform represents the same underlying claim in its own format, so attributions produced in one ecosystem cannot be verified or reused in another. This document aims to make attribution claims portable across organisations and tools. It specifies a data model and exchange format for attribution tags: self-contained records that associate one blockchain address with a human-readable label, optionally refined by actor and abuse types, each carrying an attributor and human-readable evidence. The format is deliberately minimal; bundling, revocation, and machine-processable provenance are deferred to future revisions.
 
 ## 1. Introduction
 
@@ -45,8 +45,8 @@ OBIS-0003 does not cover:
 The key words **MUST**, **MUST NOT**, **SHOULD**, **SHOULD NOT**, and **MAY** in this document are to be interpreted as described in [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119) and [RFC 8174](https://www.rfc-editor.org/rfc/rfc8174) when, and only when, they appear in all capitals.
 
 - **Address.** As defined in [OBIS-0002]({{< relref "OBIS-0002" >}}) §4.3 (`address`).
-- **Actor.** A real-world participant (e.g., service, organisation, natural person) to which an address may be attributed.
-- **Attribution Tag (or "tag").** A single record associating one address with real-world context: a free-text label, optionally refined by actor types and abuse types. The label may name an actor (e.g., `binance`) or simply describe the address's role (e.g., `ransomware payment address`).
+- **Actor.** As defined in [OBIS-0002]({{< relref "OBIS-0002#81-actor" >}}) §8.1 (`actor`).
+- **Attribution Tag (or "tag").** As defined in [OBIS-0002]({{< relref "OBIS-0002#83-attribution-tag" >}}) §8.3 (`attribution-tag`); in this document, a single record associating one address with real-world context: a free-text label, optionally refined by actor types and abuse types. The label may name an actor (e.g., `binance`) or simply describe the address's role (e.g., `ransomware payment address`).
 - **Attributor.** The organisation or individual asserting the tag.
 - **Actor type / Abuse type.** Identifiers from a controlled vocabulary classifying, respectively, the kind of real-world participant an address represents and the kind of harmful activity observed. OBIS does not yet specify these vocabularies (§11); until it does, values are implementation-defined strings. A tag may carry several identifiers of either kind.
 

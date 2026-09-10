@@ -16,7 +16,7 @@ discussions-to: "https://github.com/orgs/obi-standards/discussions/2"
 
 ## Abstract
 
-Blockchain intelligence relies on a small set of recurring terms (e.g., address, wallet, cluster) that analytics vendors, investigators, regulators, and researchers use with different meanings, so that a statement made in one context cannot be reliably interpreted in another. This document defines a shared vocabulary for such terms. Each entry consists of a stable identifier, a normative definition, and informative notes on chain-specific variation and divergent usage, so that OBIS specifications and independent implementations can refer to the same concept by the same name. The vocabulary is chain-agnostic and organised in four groups: technical primitives, custody and control, wallet operational roles, and computational methods.
+Blockchain intelligence relies on a small set of recurring terms (e.g., address, wallet, cluster) that analytics vendors, investigators, regulators, and researchers use with different meanings, so that a statement made in one context cannot be reliably interpreted in another. This document defines a shared vocabulary for such terms. Each entry consists of a stable identifier, a normative definition, and informative notes on chain-specific variation and divergent usage, so that OBIS specifications and independent implementations can refer to the same concept by the same name. The vocabulary is chain-agnostic and organised in five groups: technical primitives, custody and control, wallet operational roles, computational methods, and attribution.
 
 ## 1. Introduction
 
@@ -28,16 +28,17 @@ The vocabulary is chain-agnostic. Where a term means something different under t
 
 ## 2. Scope
 
-This document defines terms in four groups:
+This document defines terms in five groups:
 
 - **Technical primitives** (§4): the on-chain objects intelligence work operates on.
 - **Custody and control** (§5): who holds the keys, and on whose behalf.
 - **Wallet operational roles** (§6): how operators expose signing keys in practice.
 - **Computational methods** (§7): how addresses are grouped by inference.
+- **Attribution** (§8): who is claimed to be behind an address, and how the claim is carried.
 
 Out of scope:
 
-- classification of actors and abuse types, which earlier revisions of this document contained and which is deferred to a separate document (§9);
+- classification of actors and abuse types, which earlier revisions of this document contained and which is deferred to a separate document (§10);
 - legal definitions, such as virtual asset service provider (VASP) or crypto-asset service provider (CASP), which are referenced where relevant and not redefined;
 - protocol detail beyond what is needed to interpret intelligence data.
 
@@ -123,11 +124,11 @@ Documents and implementations that reference this vocabulary SHOULD use the iden
 
 **Identifier.** `custodial-wallet`
 
-**Definition.** A wallet whose private keys are held by a party other than the beneficiary of the value it controls, so that a transfer requires the action of that party.
+**Definition.** A wallet whose private keys are held by a party other than the beneficiary (§8.5) of the value it controls, so that a transfer requires the action of that party.
 
 **Notes.**
 
-- The key-holding party is the *custodian*; the beneficiary has a claim against the custodian rather than on-chain control. Custodians are typically services subject to VASP or CASP obligations.
+- The key-holding party is the *custodian*, the operator of the wallet in the sense of §8.4; the beneficiary has a claim against the custodian rather than on-chain control. Custodians are typically services subject to VASP or CASP obligations.
 - On chain, custodial wallets appear as addresses operated by the custodian. Custodians commonly assign each beneficiary a *deposit address* and sweep received value into pooled addresses that hold the value of many beneficiaries. A deposit address may therefore be associated with one beneficiary, a pooled address with none in particular.
 - The test is control over the keys, not the legal form of the relationship. This follows the FATF approach, under which a service that holds or controls private keys on behalf of others provides custody.
 
@@ -143,7 +144,7 @@ Documents and implementations that reference this vocabulary SHOULD use the iden
 
 - Also called a *self-custodial* wallet, a *self-hosted* wallet or address (Regulation (EU) 2023/1113), or, in FATF usage, an *unhosted* wallet. Hardware wallets, mobile and browser wallets, and paper keys are non-custodial when the beneficiary alone keeps the keys.
 - Multi-signature arrangements in which all key holders are the same party are non-custodial.
-- Arrangements that split keys between the beneficiary and a service (e.g., a 2-of-3 scheme with a recovery key held by a provider) are classified by who can complete a transfer alone. Where neither party can, the arrangement is a shared-custody boundary case; its treatment is deferred (§9).
+- Arrangements that split keys between the beneficiary and a service (e.g., a 2-of-3 scheme with a recovery key held by a provider) are classified by who can complete a transfer alone. Where neither party can, the arrangement is a shared-custody boundary case; its treatment is deferred (§10).
 
 **Sources.** FATF (2021), which uses "unhosted wallet" for this case; Regulation (EU) 2023/1113, Art. 3(20) ("self-hosted address"); Chainalysis, *Crypto Glossary*, "Crypto Wallet".
 
@@ -217,7 +218,7 @@ The primitives of §4 are observed; the wallets and roles of §5 and §6 are not
 **Notes.**
 
 - Every heuristic has conditions under which the inferred control does not hold. A heuristic is sufficiently specified for exchange only if these failure conditions are stated together with the rule; a statement of heuristics as called for in §7.1 should include them.
-- A name alone does not identify a heuristic, since implementations under the same name differ in detail, for instance in whether transactions with CoinJoin structure are excluded from the multi-input heuristic, or which output patterns the change-address heuristic accepts. Exchanged clustering results should therefore identify the implementation or reference specification of each heuristic applied (§9).
+- A name alone does not identify a heuristic, since implementations under the same name differ in detail, for instance in whether transactions with CoinJoin structure are excluded from the multi-input heuristic, or which output patterns the change-address heuristic accepts. Exchanged clustering results should therefore identify the implementation or reference specification of each heuristic applied (§10).
 
 **Sources.** Meiklejohn et al. (2013) §4; Harrigan and Fretter (2016).
 
@@ -230,33 +231,112 @@ The primitives of §4 are observed; the wallets and roles of §5 and §6 are not
 **Notes.**
 
 - A cluster is not a wallet. One wallet may span several clusters where the heuristics miss a link, and one cluster may merge several wallets where a heuristic fails.
-- A cluster is not an actor. A cluster becomes attributed only when evidence links it, or an address in it, to a real-world actor. Whether an attribution established for one address extends to the cluster containing it is a judgement of the consumer, which depends on the heuristics behind the cluster.
-- Vendor usage often calls an attributed cluster an *entity*. This vocabulary does not yet define *entity*; see §9.
+- A cluster is not an actor (§8.1). A cluster becomes attributed only when evidence links it, or an address in it, to an actor (§8.2). Whether an attribution established for one address extends to the cluster containing it is a judgement of the consumer, which depends on the heuristics behind the cluster.
+- Vendor usage often calls an attributed cluster an *entity*. In this vocabulary *entity* is a synonym of *actor* (§8.1) and denotes the real-world party, not the set of addresses.
 
 **Sources.** Chainalysis, *Crypto Glossary*, "Address Clustering", which defines a cluster as attributed to a named actor; this entry departs by separating the inference (cluster) from the attribution.
 
-## 8. Related work
+## 8. Attribution
 
-### 8.1 Vendor glossaries
+The terms of §4 to §7 describe what is observed on a blockchain or inferred from it. Attribution is the step that connects those observations and inferences to the world outside the chain, and it rests on evidence that the chain does not contain. The terms in this section separate the claim (attribution), its carrier (attribution tag), its subject (actor), and the two relationships an actor can have to an address (operator, beneficiary). Keeping them apart makes it possible to say precisely what an attribution asserts and on what basis.
+
+### 8.1 Actor
+
+**Identifier.** `actor`
+
+**Definition.** A real-world party, whether a natural person, an organisation, or a service, that exists independently of any blockchain and that controls, or has an interest in, value at one or more addresses.
+
+**Notes.**
+
+- *Entity* is used as a synonym in vendor terminology. Both denote the real-world party; neither denotes a set of addresses, which this vocabulary calls a cluster (§7.3).
+- An actor is not an on-chain object. An address by itself identifies no actor; the link between the two is an attribution (§8.2).
+- A service, such as an exchange, a payment processor, or a mixing service, is an actor. The classification of actors by kind is deferred (§10).
+
+**Sources.** Chainalysis, *Defining the Cluster*, §4.4 (entity: "a real-world actor, a person, organization, or service, that operates in the physical or digital world outside the blockchain"); Fröwis et al. (2020) §5.2 (real-world actor: organisation, individual, or service).
+
+### 8.2 Attribution
+
+**Identifier.** `attribution`
+
+**Definition.** The evidence-based claim that a specific address is associated with a specific actor, stating whether the actor is claimed to be the operator (§8.4) or a beneficiary (§8.5) of the address.
+
+**Notes.**
+
+- Attribution is an off-chain activity. On-chain analysis alone cannot establish that an address belongs to a particular actor; it can only establish relations between addresses (§7).
+- Typical classes of attribution evidence are direct interaction with a service, records recovered from seized infrastructure, confirmation by a regulated party in response to a legal request, and open-source information.
+- An attribution is made to an address. It extends to other addresses only through a cluster containing that address, and then only to the extent that the cluster's heuristics hold and the relationship claimed is that of operator; an attribution to a beneficiary does not propagate (§8.5).
+- The reliability of an attribution depends on the origin of its evidence and on the processing history of the record that carries it; both should be exchanged with the claim.
+
+**Sources.** Chainalysis, *Defining the Cluster*, §4.5 ("the evidentiary claim linking a specific address to a specific entity"); Fröwis et al. (2020) §1, §4.3.
+
+### 8.3 Attribution tag
+
+**Identifier.** `attribution-tag`
+
+**Definition.** A record that attributes contextual information to an address, consisting at minimum of a human-readable label, the party asserting it, and the evidence supporting it.
+
+**Notes.**
+
+- A tag is the carrier of an attribution, not the attribution itself: the same claim can be carried by tags from different asserting parties with different evidence.
+- A label may name an actor (e.g., an exchange) or describe a role observed at the address (e.g., "ransomware payment address"). The label alone does not state which, nor which relationship (§8.4, §8.5) is claimed.
+- Free-text labels are ambiguous in the way tags on shared content generally are: one label can carry several meanings, several labels can carry the same meaning, and a label such as "ransomware" does not say whether the address belongs to the perpetrator or the victim. Where machine comparison is needed, tags therefore carry categories drawn from a controlled vocabulary alongside the label.
+- Fröwis et al. also allow tags on transactions and on clusters. This vocabulary defines the address-scoped case; tags on other objects are extensions of it.
+
+**Sources.** Fröwis et al. (2020) §1 ("any form of context information that can be attributed to an address, transaction or cluster"), §2.2, §5.1; GraphSense, *TagPacks Wiki*.
+
+### 8.4 Operator
+
+**Identifier.** `operator`
+
+**Definition.** The actor that holds the keys controlling an address and can transfer value from it at will.
+
+**Notes.**
+
+- An address has exactly one operator. For a custodial wallet (§5.2) the operator is the custodian; for a non-custodial wallet (§5.3) the operator and the beneficiary coincide.
+- An attribution to the operator is the kind of attribution that propagates across a cluster, because common control is what a cluster asserts.
+
+**Sources.** Chainalysis, *Defining the Cluster*, §4.6.
+
+### 8.5 Beneficiary
+
+**Identifier.** `beneficiary`
+
+**Definition.** An actor with an economic interest in the value at an address whose access to that value is mediated by the operator.
+
+**Notes.**
+
+- A deposit address at an exchange has the customer as beneficiary and the exchange as operator. Attributing the deposit address to the customer and propagating that attribution across the exchange's cluster is a known error: the evidence is correct, the conclusion is not.
+- A service that transacts through the infrastructure of another service (a nested service) is a beneficiary of the larger service's addresses, not their operator.
+- An attribution to a beneficiary applies to the address it is made for and does not extend to the cluster (§8.2).
+
+**Sources.** Chainalysis, *Defining the Cluster*, §4.6.
+
+## 9. Related work
+
+### 9.1 Vendor glossaries
 
 Chainalysis publishes a public [Crypto Glossary](https://www.chainalysis.com/glossary/) covering, among other terms, [address clustering](https://www.chainalysis.com/glossary/address-clustering/) and [crypto wallets](https://www.chainalysis.com/glossary/crypto-wallet/). It is the most visible vendor vocabulary in the field and the reference point for much investigative usage. This document aligns with it on the definition of address clustering and on the custodial and hot/cold distinctions, and departs from it in two places: it defines a warm-wallet role, and it treats a cluster as a hypothesis of common control rather than as an attributed entity. Other vendors (e.g., TRM Labs, Elliptic) maintain their own terminology in product documentation that is not consistently public.
 
-### 8.2 Protocol developer glossaries
+### 9.2 Protocol developer glossaries
 
 The [Bitcoin developer glossary](https://developer.bitcoin.org/glossary.html) and the [ethereum.org glossary](https://ethereum.org/en/glossary/) define the technical primitives precisely for their respective chains. They are among the sources for §4 but are silent on custody, operational roles, and clustering, which are concerns of intelligence work rather than of protocol design.
 
-### 8.3 Regulatory definitions
+### 9.3 Regulatory definitions
 
 The FATF *Updated Guidance for a Risk-Based Approach to Virtual Assets and Virtual Asset Service Providers* (2021) and Regulation (EU) 2023/1114 (MiCA) define custody in terms of holding or controlling private keys on behalf of others. For the non-custodial case FATF uses "unhosted wallet" and Regulation (EU) 2023/1113 "self-hosted address". §5 follows these definitions and references them rather than restating them; the legal categories VASP and CASP themselves are out of scope.
 
-### 8.4 INTERPOL DW-VA-Taxonomy and GraphSense conventions
+### 9.4 INTERPOL DW-VA-Taxonomy and GraphSense conventions
 
-The [INTERPOL Darkweb and Virtual Assets Taxonomy](https://interpol-innovation-centre.github.io/DW-VA-Taxonomy/) (Entity Taxonomy v0.3, Abuse Taxonomy v0.1) classifies actors and abuses in the dark-web and cryptoasset ecosystems, and GraphSense [TagPacks](https://github.com/graphsense/graphsense-tagpacks/wiki/GraphSense-TagPacks) reuse it for their `category` and `abuse` fields. Both are classification schemes rather than vocabularies. They are the expected starting point for the actor and abuse classification work that earlier revisions of this document contained and that is now deferred (§9).
+The [INTERPOL Darkweb and Virtual Assets Taxonomy](https://interpol-innovation-centre.github.io/DW-VA-Taxonomy/) (Entity Taxonomy v0.3, Abuse Taxonomy v0.1) classifies actors and abuses in the dark-web and cryptoasset ecosystems, and GraphSense [TagPacks](https://github.com/graphsense/graphsense-tagpacks/wiki/GraphSense-TagPacks) reuse it for their `category` and `abuse` fields. Both are classification schemes rather than vocabularies. They are the expected starting point for the actor and abuse classification work that earlier revisions of this document contained and that is now deferred (§10).
 
-## 9. Open issues
+### 9.5 Attribution ontologies
+
+Fröwis et al. (2020) examine the evidential value of address clustering and attribution tags in criminal proceedings, derive legal requirements for both (lawfulness of processing, reliability, verifiability, chain of evidence), and propose a data-sharing model for tags and clusters built on the CASE ontology. §8.3 adopts their notion of an attribution tag and the reliability argument behind §8.2. Chainalysis, *Defining the Cluster* (2026), decomposes the legacy notion of a cluster into a two-tier framework: structural claims about common key control, and attribution claims with stated evidence and confidence. Its *wallet segment* (addresses whose common control has been established on chain) corresponds closely to the `cluster` of §7.3, while its *cluster* is narrower, an attributed union of wallet segments. §8.1, §8.2, §8.4, and §8.5 adopt its definitions of entity, attribution, and the operator/beneficiary distinction.
+
+## 10. Open issues
 
 - **Actor and abuse classification.** Earlier revisions of this document specified Actor Type and Abuse Type concept schemes with an extension mechanism. That material is withdrawn from this document and will be reintroduced as a separate OBIS classification document built on this vocabulary. Until then OBIS specifies no actor or abuse categories.
-- **Further terms.** Candidates for later revisions include *actor*, *entity*, *service*, *attribution*, *label*, *transaction graph*, *mixer* and *CoinJoin*, and *bridge*. Proposals go to the discussion thread linked in the status block.
+- **Further terms.** Candidates for later revisions include *service*, *label*, *transaction graph*, *mixer* and *CoinJoin*, and *bridge*. Proposals go to the discussion thread linked in the status block.
 - **Shared custody.** Arrangements in which neither the beneficiary nor a service can complete a transfer alone (§5.3) are not yet classified.
 - **Heuristic specifications.** Reference specifications of individual clustering heuristics, including their failure conditions, are planned as separate OBIS work.
 - **Serialisation.** A machine-readable representation of the vocabulary (e.g., SKOS/RDF or JSON) is deferred; the entries in this document are the normative representation.
@@ -284,6 +364,8 @@ The [INTERPOL Darkweb and Virtual Assets Taxonomy](https://interpol-innovation-c
 - S. Meiklejohn et al., [*A Fistful of Bitcoins: Characterizing Payments Among Men with No Names*](https://doi.org/10.1145/2504730.2504747), Proc. IMC 2013.
 - E. Androulaki et al., [*Evaluating User Privacy in Bitcoin*](https://doi.org/10.1007/978-3-642-39884-1_4), Proc. Financial Cryptography and Data Security 2013.
 - M. Harrigan and C. Fretter, [*The Unreasonable Effectiveness of Address Clustering*](https://arxiv.org/abs/1605.06369), 2016.
+- M. Fröwis, T. Gottschalk, B. Haslhofer, C. Rückert, and P. Pesch, [*Safeguarding the Evidential Value of Forensic Cryptocurrency Investigations*](https://doi.org/10.1016/j.fsidi.2019.200902), Forensic Science International: Digital Investigation 33, 2020 (preprint: [arXiv:1906.12221](https://arxiv.org/abs/1906.12221)).
+- Chainalysis (J. Illum), [*Defining the Cluster: A Formal Ontology for Blockchain Address Analysis and Intelligence Claims*](https://www.chainalysis.com/reports/defining-the-cluster/), June 2026.
 - INTERPOL Innovation Centre, [*Darkweb and Virtual Assets Taxonomy*](https://interpol-innovation-centre.github.io/DW-VA-Taxonomy/). Entity Taxonomy v0.3, Abuse Taxonomy v0.1.
 - GraphSense, [*TagPacks Wiki*](https://github.com/graphsense/graphsense-tagpacks/wiki/GraphSense-TagPacks).
 - [OBIS-0001]({{< relref "OBIS-0001" >}}), *OBIS Document Lifecycle*.
