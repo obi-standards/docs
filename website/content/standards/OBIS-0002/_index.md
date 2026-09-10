@@ -69,7 +69,7 @@ Documents and implementations that reference this vocabulary SHOULD use the iden
 - A block may contain no transactions.
 - Whether a block is final differs by chain: in proof-of-work systems finality is probabilistic and grows with the number of succeeding blocks; in proof-of-stake systems it is typically established by a separate finalisation step. Intelligence data derived from recent blocks may be subject to reorganisation.
 
-**Sources.** Nakamoto (2008) §4; Wood, *Ethereum Yellow Paper*, §4.3.
+**Sources.** Nakamoto (2008) §3–4; Wood, *Ethereum Yellow Paper*, §4.4.
 
 ### 4.2 Transaction
 
