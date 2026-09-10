@@ -37,6 +37,7 @@ This document defines terms in four groups:
 
 Out of scope:
 
+- classification of actors and abuse types, which earlier revisions of this document contained and which is deferred to a separate document (§9);
 - legal definitions, such as virtual asset service provider (VASP) or crypto-asset service provider (CASP), which are referenced where relevant and not redefined;
 - protocol detail beyond what is needed to interpret intelligence data.
 
@@ -52,13 +53,13 @@ Each term is presented as an entry with the following parts:
 - **Notes.** Informative remarks on chain-specific variation, boundary cases, and usages this vocabulary departs from.
 - **Sources.** Informative pointers to prior definitions the entry aligns with or diverges from.
 
-Documents and implementations that reference this vocabulary SHOULD use the identifier, and MAY additionally display the label, in English or in another language. A term used in an OBIS document with the meaning defined here is linked to its entry on first use.
+Documents and implementations that reference this vocabulary SHOULD use the identifier, and MAY additionally display the label, in English or in another language. An OBIS document that uses a term with the meaning defined here SHOULD link to its entry on first use.
 
 ## 4. Technical primitives
 
 ### 4.1 Block
 
-**Identifier:** `block`
+**Identifier.** `block`
 
 **Definition.** A set of transactions, ordered and committed to a blockchain as a single unit, that references its predecessor by cryptographic hash.
 
@@ -81,7 +82,7 @@ Documents and implementations that reference this vocabulary SHOULD use the iden
 - Transactions are authorised by the signatures of the parties that control the value or accounts they spend from. The exception is the coinbase transaction of a UTXO-model block, which issues new value and consumes no prior outputs, and is authored by the block producer without a signature.
 - Under the UTXO model a transaction consumes one or more previously created outputs as *inputs* and creates new *outputs*; there is no single sender or recipient, and value flow is read from the set of inputs and outputs.
 - Under the account model a transaction has exactly one sender account, a value, optional call data, and either one recipient account or contract or, for contract creation, no recipient.
-- Value movements that occur as a *consequence* of a transaction, such as transfers triggered by contract code (EVM "internal transactions" or traces) or token transfers recorded in event logs, are effects of a transaction and are not transactions in the sense of this entry. Intelligence data SHOULD state whether it accounts for such effects.
+- Value movements that occur as a *consequence* of a transaction, such as transfers triggered by contract code (EVM "internal transactions" or traces) or token transfers recorded in event logs, are effects of a transaction and are not transactions in the sense of this entry. Intelligence data should state whether it accounts for such effects.
 - A transaction that has been broadcast but not yet included in a block is *unconfirmed*; the term as defined here refers to recorded transactions unless stated otherwise.
 
 **Sources.** Nakamoto (2008) §2; Wood, *Ethereum Yellow Paper*, §4.2.
@@ -94,7 +95,7 @@ Documents and implementations that reference this vocabulary SHOULD use the iden
 
 **Notes.**
 
-- On Bitcoin an address is the encoding of a spending condition: the hash of a public key or of a script, or, for Taproot outputs, a tweaked public key, in the Base58Check formats of [BIP-13](https://github.com/bitcoin/bips/blob/master/bip-0013.mediawiki) or the Bech32 and Bech32m formats of [BIP-173](https://github.com/bitcoin/bips/blob/master/bip-0173.mediawiki), [BIP-350](https://github.com/bitcoin/bips/blob/master/bip-0350.mediawiki), and [BIP-341](https://github.com/bitcoin/bips/blob/master/bip-0341.mediawiki). Addresses do not appear in the chain as such; transactions carry the underlying scripts.
+- On Bitcoin an address is the encoding of a spending condition: the hash of a public key or of a script, or, for Taproot outputs ([BIP-341](https://github.com/bitcoin/bips/blob/master/bip-0341.mediawiki)), a tweaked public key. Legacy addresses use Base58Check (for pay-to-script-hash per [BIP-13](https://github.com/bitcoin/bips/blob/master/bip-0013.mediawiki)); native SegWit addresses use the Bech32 and Bech32m formats of [BIP-173](https://github.com/bitcoin/bips/blob/master/bip-0173.mediawiki) and [BIP-350](https://github.com/bitcoin/bips/blob/master/bip-0350.mediawiki). Addresses do not appear in the chain as such; transactions carry the underlying scripts.
 - On Ethereum an address is the rightmost 160 bits of the Keccak-256 hash of an account's public key or, for a contract, of the creator's address and nonce (Yellow Paper §7) or of a salt and the contract's initialisation code ([EIP-1014](https://eips.ethereum.org/EIPS/eip-1014)), which makes some contract addresses predictable before deployment; the mixed-case checksum encoding is specified in [EIP-55](https://eips.ethereum.org/EIPS/eip-55).
 - An address is not an actor. The same party typically controls many addresses, and hierarchical-deterministic wallets generate new addresses on demand. A contract address is controlled by code rather than by a key.
 - Addresses are scoped to a chain. The same address string is valid on all chains that use the Ethereum address format. For an externally owned account it is controlled by the same key on each of them, but balance and history differ per chain, and a contract deployed at an address on one chain may be absent or different on another. Intelligence data therefore identifies the chain together with the address.
@@ -180,18 +181,32 @@ Operators of services distinguish their wallets by where signing keys are held a
 
 **Identifier.** `cold-wallet`
 
-**Definition.** A wallet whose signing keys are generated and held on systems that are never connected to a network, that is used only for infrequent transfers, and whose transactions are signed offline and transferred to a connected system for broadcast.
+**Definition.** A wallet whose signing keys are generated and held on systems that are never connected to a network, so that transactions are signed offline and transferred to a connected system for broadcast.
 
 **Notes.**
 
-- Cold wallets hold the bulk of an operator's balance; movements from them are infrequent and typically large.
-- The role is defined by practice, not by device. A hardware wallet keeps its keys offline, but one that signs daily operational transactions under human approval plays the warm role (§6.2), not the cold role.
+- Cold wallets hold the bulk of an operator's balance; movements from them are infrequent and typically large. Infrequent use is characteristic of the role but not part of its definition.
+- The role is defined by practice, not by device. A hardware wallet keeps its keys offline, but one attached to a connected host that signs daily operational transactions under human approval plays the warm role (§6.2), not the cold role.
 
 **Sources.** Chainalysis, *Crypto Glossary*, "Crypto Wallet" (aligned: keys kept offline).
 
 ## 7. Computational methods
 
 The primitives of §4 are observed; the wallets and roles of §5 and §6 are not, and intelligence work reaches them by inference from on-chain data. The terms in this section name that inference and its result: the process of grouping addresses, the rules the process applies, and the sets of addresses it produces. Keeping these apart from the wallets and actors they are inferences about is the main purpose of the section, since a large share of the disagreement noted in §1 comes from using the result of an inference as if it were an observation.
+
+### 7.1 Address clustering
+
+**Identifier.** `address-clustering`
+
+**Definition.** The process of grouping addresses that are presumed to be controlled by the same party, based on evidence observable on the blockchain and on one or more stated clustering heuristics.
+
+**Notes.**
+
+- Clustering is inference, not observation. Its result is interpretable only together with the heuristics that produced it; intelligence data derived from clustering should therefore state those heuristics (§7.2).
+- Under the UTXO model the canonical heuristic is the *multi-input* (or *co-spend*) heuristic: all inputs of a transaction are presumed to be controlled by the same party. It fails for collaborative transactions such as CoinJoin, which are constructed to violate it. The *change-address* heuristic identifies which output of a transaction returns value to the sender and links it to the inputs.
+- Under the account model there is no co-spending; clustering rests on other signals, such as the sweeping of deposit addresses into a service's hot wallet (§5.2, §6.1), or funding relations between addresses.
+
+**Sources.** Meiklejohn et al. (2013); Androulaki et al. (2013); Harrigan and Fretter (2016); Chainalysis, *Crypto Glossary*, "Address Clustering" (aligned on the definition).
 
 ### 7.2 Clustering heuristic
 
@@ -201,12 +216,14 @@ The primitives of §4 are observed; the wallets and roles of §5 and §6 are not
 
 **Notes.**
 
-- Every heuristic has conditions under which the inferred control does not hold. A heuristic is sufficiently specified for exchange only if these failure conditions are stated together with the rule; a statement of heuristics as required by §7.1 SHOULD include them.
-- A name alone does not identify a heuristic, since implementations of a heuristic under the same name differ in detail, for instance in whether
+- Every heuristic has conditions under which the inferred control does not hold. A heuristic is sufficiently specified for exchange only if these failure conditions are stated together with the rule; a statement of heuristics as called for in §7.1 should include them.
+- A name alone does not identify a heuristic, since implementations under the same name differ in detail, for instance in whether transactions with CoinJoin structure are excluded from the multi-input heuristic, or which output patterns the change-address heuristic accepts. Exchanged clustering results should therefore identify the implementation or reference specification of each heuristic applied (§9).
+
+**Sources.** Meiklejohn et al. (2013) §4; Harrigan and Fretter (2016).
 
 ### 7.3 Cluster
 
-**Identifier:** `cluster`
+**Identifier.** `cluster`
 
 **Definition.** A set of addresses grouped by address clustering under stated heuristics. A cluster expresses a hypothesis of common control and carries no attribution to a real-world actor by itself.
 
@@ -226,7 +243,7 @@ Chainalysis publishes a public [Crypto Glossary](https://www.chainalysis.com/glo
 
 ### 8.2 Protocol developer glossaries
 
-The [Bitcoin developer glossary](https://developer.bitcoin.org/glossary.html) and the [ethereum.org glossary](https://ethereum.org/en/glossary/) define the technical primitives precisely for their respective chains. They are the sources for §4 but are silent on custody, operational roles, and clustering, which are concerns of intelligence work rather than of protocol design.
+The [Bitcoin developer glossary](https://developer.bitcoin.org/glossary.html) and the [ethereum.org glossary](https://ethereum.org/en/glossary/) define the technical primitives precisely for their respective chains. They are among the sources for §4 but are silent on custody, operational roles, and clustering, which are concerns of intelligence work rather than of protocol design.
 
 ### 8.3 Regulatory definitions
 
@@ -240,7 +257,7 @@ The [INTERPOL Darkweb and Virtual Assets Taxonomy](https://interpol-innovation-c
 
 - **Actor and abuse classification.** Earlier revisions of this document specified Actor Type and Abuse Type concept schemes with an extension mechanism. That material is withdrawn from this document and will be reintroduced as a separate OBIS classification document built on this vocabulary. Until then OBIS specifies no actor or abuse categories.
 - **Further terms.** Candidates for later revisions include *actor*, *entity*, *service*, *attribution*, *label*, *transaction graph*, *mixer* and *CoinJoin*, and *bridge*. Proposals go to the discussion thread linked in the status block.
-- **Shared custody.** Arrangements in which neither the holder nor a service can complete a transfer alone (§5.3) are not yet classified.
+- **Shared custody.** Arrangements in which neither the beneficiary nor a service can complete a transfer alone (§5.3) are not yet classified.
 - **Heuristic specifications.** Reference specifications of individual clustering heuristics, including their failure conditions, are planned as separate OBIS work.
 - **Serialisation.** A machine-readable representation of the vocabulary (e.g., SKOS/RDF or JSON) is deferred; the entries in this document are the normative representation.
 - **Multilingual labels.** Labels in languages other than English are deferred.
@@ -248,16 +265,20 @@ The [INTERPOL Darkweb and Virtual Assets Taxonomy](https://interpol-innovation-c
 ## References
 
 - IETF [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119), *Key words for use in RFCs to Indicate Requirement Levels*.
+- IETF [RFC 8174](https://www.rfc-editor.org/rfc/rfc8174), *Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words*.
 - S. Nakamoto, [*Bitcoin: A Peer-to-Peer Electronic Cash System*](https://bitcoin.org/bitcoin.pdf), 2008.
 - G. Wood, [*Ethereum: A Secure Decentralised Generalised Transaction Ledger*](https://ethereum.github.io/yellowpaper/paper.pdf) (Yellow Paper).
 - Bitcoin, [BIP-13](https://github.com/bitcoin/bips/blob/master/bip-0013.mediawiki), *Address Format for pay-to-script-hash*.
 - Bitcoin, [BIP-173](https://github.com/bitcoin/bips/blob/master/bip-0173.mediawiki), *Base32 address format for native v0-16 witness outputs*.
+- Bitcoin, [BIP-341](https://github.com/bitcoin/bips/blob/master/bip-0341.mediawiki), *Taproot: SegWit version 1 spending rules*.
 - Bitcoin, [BIP-350](https://github.com/bitcoin/bips/blob/master/bip-0350.mediawiki), *Bech32m format for v1+ witness addresses*.
 - Ethereum, [EIP-55](https://eips.ethereum.org/EIPS/eip-55), *Mixed-case checksum address encoding*.
+- Ethereum, [EIP-1014](https://eips.ethereum.org/EIPS/eip-1014), *Skinny CREATE2*.
 - Bitcoin Project, [*Developer Glossary*](https://developer.bitcoin.org/glossary.html).
 - Ethereum Foundation, [*Ethereum Glossary*](https://ethereum.org/en/glossary/).
 - FATF, [*Updated Guidance for a Risk-Based Approach to Virtual Assets and Virtual Asset Service Providers*](https://www.fatf-gafi.org/en/publications/Fatfrecommendations/Guidance-rba-virtual-assets-2021.html), October 2021.
 - European Union, [Regulation (EU) 2023/1114 on markets in crypto-assets (MiCA)](https://eur-lex.europa.eu/eli/reg/2023/1114/oj).
+- European Union, [Regulation (EU) 2023/1113 on information accompanying transfers of funds and certain crypto-assets (Transfer of Funds Regulation)](https://eur-lex.europa.eu/eli/reg/2023/1113/oj).
 - CryptoCurrency Certification Consortium (C4), [*CryptoCurrency Security Standard (CCSS)*](https://cryptoconsortium.org/ccss/).
 - Chainalysis, [*Crypto Glossary*](https://www.chainalysis.com/glossary/).
 - S. Meiklejohn et al., [*A Fistful of Bitcoins: Characterizing Payments Among Men with No Names*](https://doi.org/10.1145/2504730.2504747), Proc. IMC 2013.
