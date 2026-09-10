@@ -4,7 +4,7 @@ type: docs
 weight: 3
 bookToc: true
 status: "Draft"
-date: "2026-05-19"
+date: "2026-09-10"
 editor: "Bernhard Haslhofer"
 focus_area: "Investigations and forensics"
 discussions-to: "https://github.com/orgs/obi-standards/discussions/3"
@@ -12,7 +12,7 @@ discussions-to: "https://github.com/orgs/obi-standards/discussions/3"
 
 # OBIS-0003: Attribution Tag Data Model and Exchange Format
 
-{{< status state="Draft" date="2026-05-19" editor="Bernhard Haslhofer" focus="Investigations and forensics" >}}
+{{< status state="Draft" date="2026-09-10" editor="Bernhard Haslhofer" focus="Investigations and forensics" >}}
 
 ## Abstract
 
@@ -37,14 +37,14 @@ OBIS-0003 covers:
 OBIS-0003 does not cover:
 
 - the controlled vocabularies for actor and abuse types (not yet specified by OBIS; see §11);
-- the production of attributions (heuristics, clustering, investigative method);
+- the production of attributions ([address clustering]({{< relref "OBIS-0002#71-address-clustering" >}}), investigative method);
 - transmittal protocols (push, pull, query); only the data format is normative.
 
 ## 3. Terminology
 
-The key words **MUST**, **MUST NOT**, **SHOULD**, **SHOULD NOT**, and **MAY** are to be interpreted as described in [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119).
+The key words **MUST**, **MUST NOT**, **SHOULD**, **SHOULD NOT**, and **MAY** in this document are to be interpreted as described in [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119) and [RFC 8174](https://www.rfc-editor.org/rfc/rfc8174) when, and only when, they appear in all capitals.
 
-- **Address.** As defined in [OBIS-0002]({{< relref "OBIS-0002" >}}) §4.3: an identifier that controls the receipt and spending of value on a blockchain, in the encoding defined by the respective chain's standards (e.g., the Bitcoin address formats specified in [BIP-173](https://github.com/bitcoin/bips/blob/master/bip-0173.mediawiki) and related BIPs, Ethereum account addresses with [EIP-55](https://eips.ethereum.org/EIPS/eip-55) checksumming).
+- **Address.** As defined in [OBIS-0002]({{< relref "OBIS-0002" >}}) §4.3 (`address`).
 - **Actor.** A real-world participant (e.g., service, organisation, natural person) to which an address may be attributed.
 - **Attribution Tag (or "tag").** A single record associating one address with real-world context: a free-text label, optionally refined by actor types and abuse types. The label may name an actor (e.g., `binance`) or simply describe the address's role (e.g., `ransomware payment address`).
 - **Attributor.** The organisation or individual asserting the tag.
@@ -57,11 +57,11 @@ OBIS-0003 commits to the following principles:
 1. **Explicit chain identification.** Every tag names the chain its address lives on, alongside the address in the chain's native encoding. Nothing is inferred from address syntax; disambiguation across chains is a first-class concern.
 2. **Controlled vocabularies for categorisation.** Actor and abuse classifications are identifiers from a controlled vocabulary, not free-form text. Until OBIS specifies such vocabularies (§11), producers SHOULD draw values from a documented vocabulary they name (e.g., the INTERPOL DW-VA-Taxonomy, §10.2). A tag MAY carry several identifiers of either kind.
 3. **Human-readable evidence.** Every tag carries evidence that a human can assess: each evidence item has a description and optionally a URI pointing to a public source or a manifestation (e.g., a case file or screenshot). Machine-processable provenance chains are deferred (§11).
-4. **Address-scoped tags.** A tag provides context for exactly one address. Any extension of an attribution beyond the named address (e.g., via clustering) is the consumer's responsibility and is out of scope.
+4. **Address-scoped tags.** A tag provides context for exactly one address. Any extension of an attribution beyond the named address, for instance to the [cluster]({{< relref "OBIS-0002#73-cluster" >}}) containing it, is the consumer's responsibility and is out of scope.
 
 ## 5. Identifiers
 
-A tag identifies its subject with two fields: `chain`, a lowercase chain identifier (e.g., `bitcoin`, `ethereum`, `tron`), and `address`, the address string in the chain's native encoding. Implementations MUST NOT infer the chain from address syntax.
+A tag identifies its subject with two fields: `chain`, a lowercase chain identifier (e.g., `bitcoin`, `ethereum`, `tron`), and `address`, the address string in the chain's native encoding (e.g., the Bitcoin formats of [BIP-173](https://github.com/bitcoin/bips/blob/master/bip-0173.mediawiki) and related BIPs, Ethereum addresses with [EIP-55](https://eips.ethereum.org/EIPS/eip-55) checksumming). Implementations MUST NOT infer the chain from address syntax.
 
 A shared registry of chain identifiers, including testnet and fork disambiguation, is deferred (§11). Until it exists, attributors SHOULD use the lowercased form of the chain names established by community-curated lists (e.g., the [DefiLlama chain list](https://defillama.com/chains)).
 
@@ -79,11 +79,11 @@ An attribution tag is a single record with the following fields:
 | `attributor` | string | yes | URI or name identifying the organisation or individual asserting the tag. |
 | `evidence` | array | yes | Evidence items supporting the claim; at least one. |
 
-The label is mandatory: it is the context a human reader sees first and is typically what implementations display alongside the address. `actor_types` and `abuse_types` refine it with machine-comparable concepts.
+The label is mandatory: it is the context a human reader sees first and is typically what implementations display alongside the address. `actor_types` and `abuse_types` refine it with machine-comparable identifiers.
 
 Each evidence item is an object with a required `description`, a human-readable account of what supports the claim, and an optional `uri` pointing either to a public source or to a manifestation of the evidence (e.g., a case file or screenshot).
 
-A tag applies to exactly the address named in its `address` field. Any propagation to other addresses is the consumer's responsibility and is out of scope.
+A tag applies to exactly the address named in its `address` field. Any propagation to other addresses, including the other members of a cluster containing it, is the consumer's responsibility and is out of scope.
 
 ## 7. Serialization
 
@@ -190,6 +190,7 @@ The major commercial blockchain analytics vendors (Chainalysis, TRM Labs, Ellipt
 ## References
 
 - IETF [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119), *Key words for use in RFCs to Indicate Requirement Levels*.
+- IETF [RFC 8174](https://www.rfc-editor.org/rfc/rfc8174), *Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words*.
 - Bitcoin, [BIP-173](https://github.com/bitcoin/bips/blob/master/bip-0173.mediawiki), *Base32 address format for native v0-16 witness outputs*.
 - Ethereum, [EIP-55](https://eips.ethereum.org/EIPS/eip-55), *Mixed-case checksum address encoding*.
 - W3C, [*PROV Data Model*](https://www.w3.org/TR/prov-dm/).
